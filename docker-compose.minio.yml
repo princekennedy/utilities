@@ -13,7 +13,7 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin123}
     volumes:
-      - minio_data:/data
+      - /storage/minio:/data
     healthcheck:
       test: ["CMD", "mc", "ready", "local"]
       interval: 10s
@@ -24,10 +24,6 @@ services:
     #   traefik.docker.network: production-network
     networks:
       - production-network
-
-volumes:
-  minio_data:
-    external: true
 
 networks:
   production-network:
