@@ -59,7 +59,7 @@ docker-compose.opensearch.yml	dokploy-opensearch:9200	opensearch	9200 API, 9600 
 docker-compose.minio.yml	dokploy-minio:9000	minio	9000 S3 API, 9001 console
 docker-compose.rabbitmq.yml	dokploy-rabbitmq:5672	rabbitmq	5672 AMQP, 15672 management
 
-Each `*_IMAGE` variable overrides the default image tag, so you can pin a version or switch registry without changing the file. Each `*_NAME` variable sets both the Compose project name and the container name; its default is the current `prod-*` value.
+Each `*_IMAGE` variable overrides the default image tag, so you can pin a version or switch registry without changing the file. Each `*_NAME` variable sets both the Compose project name and the container name; its default is the current `dev-*` value.
 
 Change these defaults in particular: `POSTGRES_PASSWORD`, `MINIO_ROOT_PASSWORD` / `MINIO_ROOT_USER`, `RABBITMQ_DEFAULT_PASS` / `RABBITMQ_DEFAULT_USER`, and `OPENSEARCH_INITIAL_ADMIN_PASSWORD`.
 

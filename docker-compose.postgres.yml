@@ -1,9 +1,9 @@
-name: ${POSTGRES_NAME:-prod-postgres}
+name: ${POSTGRES_NAME:-dev-postgres}
 
 services:
   postgres:
     image: ${POSTGRES_IMAGE:-postgres:18}
-    container_name: ${POSTGRES_NAME:-prod-postgres}
+    container_name: ${POSTGRES_NAME:-dev-postgres}
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-dokploy}

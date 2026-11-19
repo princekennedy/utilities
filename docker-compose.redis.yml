@@ -1,9 +1,9 @@
-name: ${REDIS_NAME:-prod-redis}
+name: ${REDIS_NAME:-dev-redis}
 
 services:
   redis:
     image: ${REDIS_IMAGE:-redis:8-alpine}
-    container_name: ${REDIS_NAME:-prod-redis}
+    container_name: ${REDIS_NAME:-dev-redis}
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes"]
     expose:

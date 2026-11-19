@@ -1,9 +1,9 @@
-name: ${MINIO_NAME:-prod-minio}
+name: ${MINIO_NAME:-dev-minio}
 
 services:
   minio:
     image: elestio/minio:latest
-    container_name: ${MINIO_NAME:-prod-minio}
+    container_name: ${MINIO_NAME:-dev-minio}
     restart: unless-stopped
     command: ["server", "/data", "--console-address", ":9001"]
     ports:

@@ -1,9 +1,9 @@
-name: ${VALKEY_NAME:-prod-valkey}
+name: ${VALKEY_NAME:-dev-valkey}
 
 services:
   valkey:
     image: ${VALKEY_IMAGE:-valkey/valkey:latest}
-    container_name: ${VALKEY_NAME:-prod-valkey}
+    container_name: ${VALKEY_NAME:-dev-valkey}
     restart: unless-stopped
     command: ["valkey-server", "--appendonly", "yes"]
     ports:

@@ -1,9 +1,9 @@
-name: ${RABBITMQ_NAME:-prod-rabbitmq}
+name: ${RABBITMQ_NAME:-dev-rabbitmq}
 
 services:
   rabbitmq:
     image: ${RABBITMQ_IMAGE:-rabbitmq:4-management}
-    container_name: ${RABBITMQ_NAME:-prod-rabbitmq}
+    container_name: ${RABBITMQ_NAME:-dev-rabbitmq}
     restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-guest}

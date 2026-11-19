@@ -1,9 +1,9 @@
-name: ${OPENSEARCH_NAME:-prod-opensearch}
+name: ${OPENSEARCH_NAME:-dev-opensearch}
 
 services:
   opensearch:
     image: ${OPENSEARCH_IMAGE:-opensearchproject/opensearch:latest}
-    container_name: ${OPENSEARCH_NAME:-prod-opensearch}
+    container_name: ${OPENSEARCH_NAME:-dev-opensearch}
     restart: unless-stopped
     environment:
       cluster.name: ${OPENSEARCH_CLUSTER_NAME:-dokploy-cluster}
