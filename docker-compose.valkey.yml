@@ -1,0 +1,37 @@
+name: ${VALKEY_NAME:-prod-valkey}
+
+services:
+  valkey:
+    image: ${VALKEY_IMAGE:-valkey/valkey:latest}
+    container_name: ${VALKEY_NAME:-prod-valkey}
+    restart: unless-stopped
+    command: ["valkey-server", "--appendonly", "yes"]
+    ports:
+      - "${VALKEY_PORT:-6379}"
+    volumes:
+      - valkey_data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    labels:
+      - traefik.docker.network=dokploy-network
+    networks:
+      production-network:
+        aliases:
+          - dokploy-valkey
+      dokploy-network:
+        aliases:
+          - dokploy-valkey
+
+networks:
+  production-network:
+    name: production-network
+    external: true
+  dokploy-network:
+    name: dokploy-network
+    external: true
+
+volumes:
+  valkey_data:

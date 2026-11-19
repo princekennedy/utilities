@@ -1,0 +1,41 @@
+name: ${POSTGRES_NAME:-prod-postgres}
+
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgres:18}
+    container_name: ${POSTGRES_NAME:-prod-postgres}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-dokploy}
+      POSTGRES_USER: ${POSTGRES_USER:-dokploy_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dokploy_password}
+    ports:
+      - "${POSTGRES_PORT:-5432}"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-dokploy_user} -d ${POSTGRES_DB:-dokploy}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    labels:
+      - traefik.docker.network=dokploy-network
+    networks:
+      production-network:
+        aliases:
+          - dokploy-postgres
+      dokploy-network:
+        aliases:
+          - dokploy-postgres
+
+networks:
+  production-network:
+    name: production-network
+    external: true
+  dokploy-network:
+    name: dokploy-network
+    external: true
+
+volumes:
+  postgres_data:

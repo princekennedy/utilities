@@ -1,0 +1,42 @@
+name: ${RABBITMQ_NAME:-prod-rabbitmq}
+
+services:
+  rabbitmq:
+    image: ${RABBITMQ_IMAGE:-rabbitmq:4-management}
+    container_name: ${RABBITMQ_NAME:-prod-rabbitmq}
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-guest}
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "-rabbit loopback_users []"
+    ports:
+      - "${RABBITMQ_PORT:-5672}"
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    labels:
+      - traefik.docker.network=dokploy-network
+    networks:
+      production-network:
+        aliases:
+          - dokploy-rabbitmq
+      dokploy-network:
+        aliases:
+          - dokploy-rabbitmq
+
+networks:
+  production-network:
+    name: production-network
+    external: true
+  dokploy-network:
+    name: dokploy-network
+    external: true
+
+volumes:
+  rabbitmq_data:

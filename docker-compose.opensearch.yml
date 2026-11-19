@@ -1,0 +1,53 @@
+name: ${OPENSEARCH_NAME:-prod-opensearch}
+
+services:
+  opensearch:
+    image: ${OPENSEARCH_IMAGE:-opensearchproject/opensearch:latest}
+    container_name: ${OPENSEARCH_NAME:-prod-opensearch}
+    restart: unless-stopped
+    environment:
+      cluster.name: ${OPENSEARCH_CLUSTER_NAME:-dokploy-cluster}
+      node.name: ${OPENSEARCH_NODE_NAME:-dokploy-node1}
+      discovery.type: single-node
+      bootstrap.memory_lock: "true"
+      OPENSEARCH_JAVA_OPTS: ${OPENSEARCH_JAVA_OPTS:--Xms512m -Xmx512m}
+      OPENSEARCH_INITIAL_ADMIN_PASSWORD: ${OPENSEARCH_INITIAL_ADMIN_PASSWORD:-dokploy@2026!}
+      plugins.security.disabled: "true"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - "${OPENSEARCH_PORT:-9200}"
+      - "${OPENSEARCH_PERFORMANCE_PORT:-9600}"
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    labels:
+      - traefik.docker.network=dokploy-network
+    networks:
+      production-network:
+        aliases:
+          - dokploy-opensearch
+      dokploy-network:
+        aliases:
+          - dokploy-opensearch
+
+networks:
+  production-network:
+    name: production-network
+    external: true
+  dokploy-network:
+    name: dokploy-network
+    external: true
+
+volumes:
+  opensearch_data:
