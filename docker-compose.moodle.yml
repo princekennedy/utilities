@@ -1,0 +1,37 @@
+
+services:
+  moodle:
+    image: bitnami/moodle:latest
+    container_name: moodle
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    environment:
+      - MOODLE_DATABASE_TYPE=${DB_TYPE:-postgres}
+      - MOODLE_DATABASE_HOST=${DB_HOST:-localhost}
+      - MOODLE_DATABASE_PORT_NUMBER=${DB_PORT:-5432}
+      - MOODLE_DATABASE_NAME=${DB_NAME:-moodle}
+      - MOODLE_DATABASE_USER=${DB_USER:-postgres}
+      - MOODLE_DATABASE_PASSWORD=${DB_PASSWORD:-CHANGE_TO_A_STRONG_DATABASE_PASSWORD}
+      - MOODLE_USERNAME=${MOODLE_USERNAME:-admin}
+      - MOODLE_PASSWORD=${MOODLE_PASSWORD:-CHANGE_TO_A_STRONG_ADMIN_PASSWORD}
+      - MOODLE_EMAIL=${MOODLE_EMAIL:-princekennedy.developer@gmail.com}
+      - MOODLE_SITE_NAME=${MOODLE_SITE_NAME:-'Online Learning Platform'}
+      - MOODLE_SKIP_BOOTSTRAP=no
+      - PHP_MEMORY_LIMIT=512M
+      - PHP_MAX_EXECUTION_TIME=300
+    volumes:
+      - moodle_data:/bitnami/moodle
+      - moodledata:/bitnami/moodledata
+    networks:
+      - moodle-network
+
+
+volumes:
+  moodle_data:
+  moodledata:
+
+networks:
+  moodle-network:
+    driver: bridge
