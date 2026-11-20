@@ -1,7 +1,7 @@
 
 services:
   moodle:
-    image: bitnami/moodle:latest
+    image: oksigenia/moodle:5.3
     container_name: moodle
     restart: unless-stopped
     ports:
