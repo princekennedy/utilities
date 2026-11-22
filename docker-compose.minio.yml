@@ -2,29 +2,43 @@ name: ${MINIO_NAME:-prod-minio}
 
 services:
   minio:
-    image: elestio/minio:latest
+    image: ${MINIO_IMAGE:-elestio/minio:latest}
     container_name: ${MINIO_NAME:-prod-minio}
     restart: unless-stopped
     command: ["server", "/data", "--console-address", ":9001"]
     ports:
-      - "9000"
-      - "9001"
+      - "${MINIO_PORT:-9000}"
+      - "${MINIO_CONSOLE_PORT:-9001}"
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin123}
     volumes:
-      - /storage/minio:/data
+      - minio_data:/data
     healthcheck:
       test: ["CMD", "mc", "ready", "local"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 15s
-    # labels:
-    #   traefik.docker.network: production-network
+    labels:
+      - traefik.docker.network=dokploy-network
     networks:
-      - production-network
+      production-network:
+        aliases:
+          - ${MINIO_ALIAS:-dokploy-minio}
+          - ${MINIO_NAME:-prod-minio}
+      dokploy-network:
+        aliases:
+          - ${MINIO_ALIAS:-dokploy-minio}
+          - ${MINIO_NAME:-prod-minio}
 
 networks:
   production-network:
+    name: production-network
     external: true
+  dokploy-network:
+    name: dokploy-network
+    external: true
+
+volumes:
+  minio_data:

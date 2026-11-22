@@ -36,10 +36,12 @@ services:
     networks:
       production-network:
         aliases:
-          - dokploy-opensearch
+          - ${OPENSEARCH_ALIAS:-dokploy-opensearch}
+          - ${OPENSEARCH_NAME:-prod-opensearch}
       dokploy-network:
         aliases:
-          - dokploy-opensearch
+          - ${OPENSEARCH_ALIAS:-dokploy-opensearch}
+          - ${OPENSEARCH_NAME:-prod-opensearch}
 
 networks:
   production-network:

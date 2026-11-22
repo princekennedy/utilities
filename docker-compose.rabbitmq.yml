@@ -25,10 +25,12 @@ services:
     networks:
       production-network:
         aliases:
-          - dokploy-rabbitmq
+          - ${RABBITMQ_ALIAS:-dokploy-rabbitmq}
+          - ${RABBITMQ_NAME:-prod-rabbitmq}
       dokploy-network:
         aliases:
-          - dokploy-rabbitmq
+          - ${RABBITMQ_ALIAS:-dokploy-rabbitmq}
+          - ${RABBITMQ_NAME:-prod-rabbitmq}
 
 networks:
   production-network:
