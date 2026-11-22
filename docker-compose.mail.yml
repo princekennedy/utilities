@@ -1,9 +1,9 @@
-name: ${MAIL_NAME:-dev-mail}
+name: ${MAIL_NAME:-assetminds-mailserver}
 
 services:
   mailserver:
     image: ${MAIL_IMAGE:-analogic/poste.io:latest}
-    container_name: ${MAIL_NAME:-dev-mail}
+    container_name: ${MAIL_NAME:-assetminds-mailserver}
     restart: unless-stopped
 
     hostname: ${MAIL_HOSTNAME:-mail.${DOMAIN:-example.com}}
@@ -29,20 +29,25 @@ services:
 
     labels:
       - traefik.docker.network=dokploy-network
+      - "traefik.enable=${MAIL_TRAEFIK_ENABLE:-true}"
+      - "traefik.http.routers.${MAIL_TRAEFIK_ROUTER:-poste}.rule=Host(`${MAIL_HOSTNAME:-mail.${DOMAIN:-example.com}}`)"
+      - "traefik.http.routers.${MAIL_TRAEFIK_ROUTER:-poste}.entrypoints=${MAIL_TRAEFIK_ENTRYPOINT:-websecure}"
+      - "traefik.http.routers.${MAIL_TRAEFIK_ROUTER:-poste}.tls=${MAIL_TRAEFIK_TLS:-true}"
+      - "traefik.http.services.${MAIL_TRAEFIK_ROUTER:-poste}.loadbalancer.server.port=${MAIL_WEB_PORT:-80}"
 
     networks:
       production-network:
         aliases:
           - ${MAIL_ALIAS:-dokploy-mail}
-          - ${MAIL_NAME:-dev-mail}
+          - ${MAIL_NAME:-assetminds-mailserver}
       dokploy-network:
         aliases:
           - ${MAIL_ALIAS:-dokploy-mail}
-          - ${MAIL_NAME:-dev-mail}
+          - ${MAIL_NAME:-assetminds-mailserver}
 
 volumes:
   poste-data:
-    name: ${MAIL_VOLUME_NAME:-poste-data}
+    name: ${MAIL_VOLUME_NAME:-${MAIL_NAME:-assetminds-mailserver}_poste-data}
 
 networks:
   production-network:
