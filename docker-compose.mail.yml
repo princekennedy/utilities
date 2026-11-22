@@ -24,7 +24,7 @@ services:
       - "${MAIL_SIEVE_PORT:-4190}"
 
     volumes:
-      - mail_data:/data
+      - poste-data:/data
       - /etc/localtime:/etc/localtime:ro
 
     labels:
@@ -41,7 +41,7 @@ services:
           - ${MAIL_NAME:-prod-mail}
 
 volumes:
-  mail_data:
+  poste-data:
 
 networks:
   production-network:
