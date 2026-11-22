@@ -20,10 +20,12 @@ services:
     networks:
       production-network:
         aliases:
-          - dokploy-valkey
+          - ${VALKEY_ALIAS:-dokploy-valkey}
+          - ${VALKEY_NAME:-dev-valkey}
       dokploy-network:
         aliases:
-          - dokploy-valkey
+          - ${VALKEY_ALIAS:-dokploy-valkey}
+          - ${VALKEY_NAME:-dev-valkey}
 
 networks:
   production-network:

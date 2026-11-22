@@ -1,37 +1,50 @@
+name: ${MOODLE_NAME:-dev-moodle}
 
 services:
   moodle:
-    image: oksigenia/moodle:5.3
-    container_name: moodle
+    image: ${MOODLE_IMAGE:-oksigenia/moodle:5.3}
+    container_name: ${MOODLE_NAME:-dev-moodle}
     restart: unless-stopped
     ports:
-      - "8080"
-      - "8443"
+      - "${MOODLE_PORT:-8080}"
+      - "${MOODLE_HTTPS_PORT:-8443}"
     environment:
-      - MOODLE_DATABASE_TYPE=${DB_TYPE:-pgsql}
-      - MOODLE_DATABASE_HOST=${DB_HOST:-localhost}
-      - MOODLE_DATABASE_PORT_NUMBER=${DB_PORT:-5432}
-      - MOODLE_DATABASE_NAME=${DB_NAME:-moodle}
-      - MOODLE_DATABASE_USER=${DB_USER:-postgres}
-      - MOODLE_DATABASE_PASSWORD=${DB_PASSWORD:-CHANGE_TO_A_STRONG_DATABASE_PASSWORD}
-      - MOODLE_USERNAME=${MOODLE_USERNAME:-admin}
-      - MOODLE_PASSWORD=${MOODLE_PASSWORD:-CHANGE_TO_A_STRONG_ADMIN_PASSWORD}
-      - MOODLE_EMAIL=${MOODLE_EMAIL:-princekennedy.developer@gmail.com}
-      - MOODLE_SITE_NAME=${MOODLE_SITE_NAME:-'Online Learning Platform'}
-      - MOODLE_SKIP_BOOTSTRAP=no
-      - PHP_MEMORY_LIMIT=512M
-      - PHP_MAX_EXECUTION_TIME=300
+      MOODLE_DATABASE_TYPE: ${DB_TYPE:-pgsql}
+      MOODLE_DATABASE_HOST: ${DB_HOST:-localhost}
+      MOODLE_DATABASE_PORT_NUMBER: ${DB_PORT:-5432}
+      MOODLE_DATABASE_NAME: ${DB_NAME:-moodle}
+      MOODLE_DATABASE_USER: ${DB_USER:-postgres}
+      MOODLE_DATABASE_PASSWORD: ${DB_PASSWORD:-CHANGE_TO_A_STRONG_DATABASE_PASSWORD}
+      MOODLE_USERNAME: ${MOODLE_USERNAME:-admin}
+      MOODLE_PASSWORD: ${MOODLE_PASSWORD:-CHANGE_TO_A_STRONG_ADMIN_PASSWORD}
+      MOODLE_EMAIL: ${MOODLE_EMAIL:-princekennedy.developer@gmail.com}
+      MOODLE_SITE_NAME: ${MOODLE_SITE_NAME:-Online Learning Platform}
+      MOODLE_SKIP_BOOTSTRAP: "no"
+      PHP_MEMORY_LIMIT: ${MOODLE_PHP_MEMORY_LIMIT:-512M}
+      PHP_MAX_EXECUTION_TIME: ${MOODLE_PHP_MAX_EXECUTION_TIME:-300}
     volumes:
       - moodle_data:/bitnami/moodle
       - moodledata:/bitnami/moodledata
+    labels:
+      - traefik.docker.network=dokploy-network
     networks:
-      - moodle-network
-
+      production-network:
+        aliases:
+          - ${MOODLE_ALIAS:-dokploy-moodle}
+          - ${MOODLE_NAME:-dev-moodle}
+      dokploy-network:
+        aliases:
+          - ${MOODLE_ALIAS:-dokploy-moodle}
+          - ${MOODLE_NAME:-dev-moodle}
 
 volumes:
   moodle_data:
   moodledata:
 
 networks:
-  moodle-network:
-    driver: bridge
+  production-network:
+    name: production-network
+    external: true
+  dokploy-network:
+    name: dokploy-network
+    external: true

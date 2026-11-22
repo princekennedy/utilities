@@ -20,10 +20,12 @@ services:
     networks:
       production-network:
         aliases:
-          - dokploy-redis
+          - ${REDIS_ALIAS:-dokploy-redis}
+          - ${REDIS_NAME:-dev-redis}
       dokploy-network:
         aliases:
-          - dokploy-redis
+          - ${REDIS_ALIAS:-dokploy-redis}
+          - ${REDIS_NAME:-dev-redis}
 
 networks:
   production-network:

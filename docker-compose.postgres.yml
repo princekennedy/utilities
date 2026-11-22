@@ -24,10 +24,12 @@ services:
     networks:
       production-network:
         aliases:
-          - dokploy-postgres
+          - ${POSTGRES_ALIAS:-dokploy-postgres}
+          - ${POSTGRES_NAME:-dev-postgres}
       dokploy-network:
         aliases:
-          - dokploy-postgres
+          - ${POSTGRES_ALIAS:-dokploy-postgres}
+          - ${POSTGRES_NAME:-dev-postgres}
 
 networks:
   production-network:

@@ -1,0 +1,51 @@
+name: ${MAIL_NAME:-dev-mail}
+
+services:
+  mailserver:
+    image: ${MAIL_IMAGE:-analogic/poste.io:latest}
+    container_name: ${MAIL_NAME:-dev-mail}
+    restart: unless-stopped
+
+    hostname: ${MAIL_HOSTNAME:-mail.${DOMAIN:-example.com}}
+
+    environment:
+      TZ: ${MAIL_TZ:-Africa/Blantyre}
+      HTTPS: ${MAIL_HTTPS:-OFF}
+
+    ports:
+      - "${MAIL_SMTP_PORT:-25}"
+      - "${MAIL_SUBMISSION_PORT:-587}"
+      - "${MAIL_SMTPS_PORT:-465}"
+      - "${MAIL_IMAP_PORT:-143}"
+      - "${MAIL_IMAPS_PORT:-993}"
+      - "${MAIL_POP3_PORT:-110}"
+      - "${MAIL_POPS_PORT:-995}"
+      - "${MAIL_SIEVE_PORT:-4190}"
+
+    volumes:
+      - mail_data:/data
+      - /etc/localtime:/etc/localtime:ro
+
+    labels:
+      - traefik.docker.network=dokploy-network
+
+    networks:
+      production-network:
+        aliases:
+          - ${MAIL_ALIAS:-dokploy-mail}
+          - ${MAIL_NAME:-dev-mail}
+      dokploy-network:
+        aliases:
+          - ${MAIL_ALIAS:-dokploy-mail}
+          - ${MAIL_NAME:-dev-mail}
+
+volumes:
+  mail_data:
+
+networks:
+  production-network:
+    name: production-network
+    external: true
+  dokploy-network:
+    name: dokploy-network
+    external: true
