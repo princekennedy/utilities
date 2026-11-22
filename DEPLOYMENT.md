@@ -17,9 +17,9 @@ Dokploy's Traefik runs on its own `dokploy-network` (created by Dokploy) and onl
 
 ## 2. Create storage / drives
 
-Each stack uses an explicitly named volume set by `*_VOLUME_NAME`: `valkey_data`, `redis_data`, `postgres_data`, `opensearch_data`, `minio_data`, `rabbitmq_data`, `poste-data`, `moodle_data`, and `moodledata`. Mail leaves `MAIL_VOLUME_NAME` unset by default, so Compose keeps the existing derived volume `${MAIL_NAME:-dev-mail}_poste-data`; set `MAIL_VOLUME_NAME` only to reuse a different existing volume or isolate another deployment. Docker creates these automatically on the first deploy. `docker compose down` keeps them; only `down -v` or deleting the volume removes the data.
+Each stack uses a named volume set by `*_VOLUME_NAME`: `valkey_data`, `redis_data`, `postgres_data`, `opensearch_data`, `minio_data`, `rabbitmq_data`, `poste-data`, `moodle_data`, and `moodledata`. Mail defaults to the same volume name it uses today, `${MAIL_NAME:-dev-mail}_poste-data`; set `MAIL_VOLUME_NAME` to choose a different volume for a deployment. Docker creates these automatically on the first deploy. `docker compose down` keeps them; only `down -v` or deleting the volume removes the data.
 
-Most stacks use explicit bare volume names; mail keeps Compose's project-scoped name unless `MAIL_VOLUME_NAME` is set. Set a unique `*_VOLUME_NAME` when you need a different deployment volume. If you previously used a host bind mount such as `/storage/minio`, copy that data into the new named volume before switching.
+Most stacks use explicit bare volume names. Set a unique `*_VOLUME_NAME` when you need a separate volume for another deployment, for example `MAIL_VOLUME_NAME=mail_customer2_data`. If you previously used a host bind mount such as `/storage/minio`, copy that data into the new named volume before switching.
 
 For a dedicated disk or shared storage:
 
