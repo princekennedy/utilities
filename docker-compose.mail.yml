@@ -42,7 +42,6 @@ services:
 
 volumes:
   poste-data:
-    name: ${MAIL_VOLUME_NAME:-}
 
 networks:
   production-network:
