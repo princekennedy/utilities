@@ -51,7 +51,7 @@ Set these in each service's Environment section instead of editing the compose f
 | OpenSearch | `OPENSEARCH_NAME`, `OPENSEARCH_IMAGE`, `OPENSEARCH_ALIAS`, `OPENSEARCH_CLUSTER_NAME`, `OPENSEARCH_NODE_NAME`, `OPENSEARCH_JAVA_OPTS`, `OPENSEARCH_INITIAL_ADMIN_PASSWORD`, `OPENSEARCH_PORT`, `OPENSEARCH_PERFORMANCE_PORT` |
 | MinIO | `MINIO_NAME`, `MINIO_IMAGE`, `MINIO_ALIAS`, `MINIO_ROOT_USER`, `MINIO_ROOT_PASSWORD`, `MINIO_PORT`, `MINIO_CONSOLE_PORT` |
 | RabbitMQ | `RABBITMQ_NAME`, `RABBITMQ_IMAGE`, `RABBITMQ_ALIAS`, `RABBITMQ_DEFAULT_USER`, `RABBITMQ_DEFAULT_PASS`, `RABBITMQ_PORT`, `RABBITMQ_MANAGEMENT_PORT` |
-| Mail | `MAIL_NAME`, `MAIL_IMAGE`, `MAIL_HOSTNAME`, `MAIL_ALIAS`, `MAIL_TZ`, `MAIL_HTTPS`, `MAIL_SMTP_PORT`, `MAIL_SUBMISSION_PORT`, `MAIL_SMTPS_PORT`, `MAIL_IMAP_PORT`, `MAIL_IMAPS_PORT`, `MAIL_POP3_PORT`, `MAIL_POPS_PORT`, `MAIL_SIEVE_PORT`, `DOMAIN` |
+| Mail | `MAIL_NAME`, `MAIL_IMAGE`, `MAIL_HOSTNAME`, `MAIL_ALIAS`, `MAIL_TZ`, `MAIL_HTTPS`, `MAIL_WEB_PORT`, `MAIL_SMTP_PORT`, `MAIL_SUBMISSION_PORT`, `MAIL_SMTPS_PORT`, `MAIL_IMAP_PORT`, `MAIL_IMAPS_PORT`, `MAIL_POP3_PORT`, `MAIL_POPS_PORT`, `MAIL_SIEVE_PORT`, `DOMAIN` |
 | Moodle | `MOODLE_NAME`, `MOODLE_IMAGE`, `MOODLE_ALIAS`, `MOODLE_PORT`, `MOODLE_HTTPS_PORT`, `DB_TYPE`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `MOODLE_USERNAME`, `MOODLE_PASSWORD`, `MOODLE_EMAIL`, `MOODLE_SITE_NAME`, `MOODLE_PHP_MEMORY_LIMIT`, `MOODLE_PHP_MAX_EXECUTION_TIME` |
 
 Each `*_IMAGE` variable overrides the default image tag, so you can pin a version or switch registry without changing the file. Each `*_NAME` variable sets both the Compose project name and the container name; its default is the current `dev-*` value. Each `*_ALIAS` variable sets the stable internal DNS name on `production-network` and `dokploy-network`; its default is the old `dokploy-*` value.
@@ -96,7 +96,7 @@ Redis is internal-only: it has no published port and is reached over `production
   ```
   Default heap is 512 MB via `OPENSEARCH_JAVA_OPTS`; raise it for larger datasets.
 - **MinIO** — the default image is `elestio/minio:latest`. API is on container port 9000, console on 9001. Healthcheck calls `mc ready local`. When adding a domain in Dokploy, set the target container port to **9001** for the web console; port 9000 is the S3 API.
-- **Mail** — set `MAIL_HOSTNAME` (or `DOMAIN`) before the first deploy. `HTTPS=OFF` expects TLS termination in Dokploy's Traefik. Mail ports are published to random host ports; keep the `*_PORT` defaults unless Poste.io is reconfigured to match.
+- **Mail** — set `MAIL_HOSTNAME` (or `DOMAIN`) before the first deploy. `HTTPS=OFF` expects TLS termination in Dokploy's Traefik. Publish container port **80** (`MAIL_WEB_PORT`) for the Poste.io admin UI and set the Dokploy domain target port to 80. Mail ports are published to random host ports; keep the `*_PORT` defaults unless Poste.io is reconfigured to match.
 - **Moodle** — set `DB_HOST` to the unique Postgres alias for this deployment, not `localhost`. HTTP and HTTPS listen on container ports 8080 and 8443.
 
 ## 6. Deploy and troubleshoot
