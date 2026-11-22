@@ -42,7 +42,7 @@ services:
 
 volumes:
   poste-data:
-    name: ${MAIL_VOLUME_NAME:-${MAIL_NAME:-dev-mail}_poste-data}
+    name: ${MAIL_VOLUME_NAME:-poste-data}
 
 networks:
   production-network:

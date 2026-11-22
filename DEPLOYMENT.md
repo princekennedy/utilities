@@ -17,7 +17,7 @@ Dokploy's Traefik runs on its own `dokploy-network` (created by Dokploy) and onl
 
 ## 2. Create storage / drives
 
-Each stack uses an explicitly named volume set by `*_VOLUME_NAME`: `valkey_data`, `redis_data`, `postgres_data`, `opensearch_data`, `minio_data`, `rabbitmq_data`, `poste-data`, `moodle_data`, and `moodledata`. Mail defaults to `${MAIL_NAME:-dev-mail}_poste-data` so an existing deployment reuses its data. Docker creates these automatically on the first deploy. `docker compose down` keeps them; only `down -v` or deleting the volume removes the data.
+Each stack uses an explicitly named volume set by `*_VOLUME_NAME`: `valkey_data`, `redis_data`, `postgres_data`, `opensearch_data`, `minio_data`, `rabbitmq_data`, `poste-data`, `moodle_data`, and `moodledata`. Mail defaults to `poste-data` so an existing deployment reuses its data. Docker creates these automatically on the first deploy. `docker compose down` keeps them; only `down -v` or deleting the volume removes the data.
 
 Explicit volume names are not prefixed by the Compose project, so set a unique `*_VOLUME_NAME` for each deployment to avoid sharing data. If you previously used a host bind mount such as `/storage/minio`, copy that data into the new named volume before switching.
 
