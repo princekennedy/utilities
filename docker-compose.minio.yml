@@ -42,3 +42,4 @@ networks:
 
 volumes:
   minio_data:
+    name: ${MINIO_VOLUME_NAME:-minio_data}

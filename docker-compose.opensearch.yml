@@ -53,3 +53,4 @@ networks:
 
 volumes:
   opensearch_data:
+    name: ${OPENSEARCH_VOLUME_NAME:-opensearch_data}

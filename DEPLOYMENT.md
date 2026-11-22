@@ -17,9 +17,9 @@ Dokploy's Traefik runs on its own `dokploy-network` (created by Dokploy) and onl
 
 ## 2. Create storage / drives
 
-Each stack uses named volumes that Docker prefixes with the Compose project name (`valkey_data`, `redis_data`, `postgres_data`, `opensearch_data`, `minio_data`, `rabbitmq_data`, `mail_data`). Docker creates these automatically on the first deploy. `docker compose down` keeps them; only `down -v` or deleting the volume removes the data.
+Each stack uses an explicitly named volume set by `*_VOLUME_NAME`: `valkey_data`, `redis_data`, `postgres_data`, `opensearch_data`, `minio_data`, `rabbitmq_data`, and `poste-data`. The default is the current volume name. Docker creates these automatically on the first deploy. `docker compose down` keeps them; only `down -v` or deleting the volume removes the data.
 
-Because the volume names are project-prefixed, two deployments with different `*_NAME` values get separate data volumes by default. If you previously used a host bind mount such as `/storage/minio`, copy that data into the new named volume before switching.
+Explicit volume names are not prefixed by the Compose project, so set a unique `*_VOLUME_NAME` for each deployment to avoid sharing data. If you previously used a host bind mount such as `/storage/minio`, copy that data into the new named volume before switching.
 
 For a dedicated disk or shared storage:
 
@@ -45,17 +45,17 @@ Set these in each service's Environment section instead of editing the compose f
 
 | Service | Variables |
 | --- | --- |
-| Valkey | `VALKEY_NAME`, `VALKEY_IMAGE`, `VALKEY_ALIAS`, `VALKEY_PORT` |
-| Redis | `REDIS_NAME`, `REDIS_IMAGE`, `REDIS_ALIAS` |
-| Postgres | `POSTGRES_NAME`, `POSTGRES_IMAGE`, `POSTGRES_ALIAS`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_PORT` |
-| OpenSearch | `OPENSEARCH_NAME`, `OPENSEARCH_IMAGE`, `OPENSEARCH_ALIAS`, `OPENSEARCH_CLUSTER_NAME`, `OPENSEARCH_NODE_NAME`, `OPENSEARCH_JAVA_OPTS`, `OPENSEARCH_INITIAL_ADMIN_PASSWORD`, `OPENSEARCH_PORT`, `OPENSEARCH_PERFORMANCE_PORT` |
-| MinIO | `MINIO_NAME`, `MINIO_IMAGE`, `MINIO_ALIAS`, `MINIO_ROOT_USER`, `MINIO_ROOT_PASSWORD`, `MINIO_PORT`, `MINIO_CONSOLE_PORT` |
-| RabbitMQ | `RABBITMQ_NAME`, `RABBITMQ_IMAGE`, `RABBITMQ_ALIAS`, `RABBITMQ_DEFAULT_USER`, `RABBITMQ_DEFAULT_PASS`, `RABBITMQ_PORT`, `RABBITMQ_MANAGEMENT_PORT` |
-| Mail | `MAIL_NAME`, `MAIL_IMAGE`, `MAIL_HOSTNAME`, `MAIL_ALIAS`, `MAIL_TZ`, `MAIL_HTTPS`, `MAIL_SMTP_PORT`, `MAIL_SUBMISSION_PORT`, `MAIL_SMTPS_PORT`, `MAIL_IMAP_PORT`, `MAIL_IMAPS_PORT`, `MAIL_POP3_PORT`, `MAIL_POPS_PORT`, `MAIL_SIEVE_PORT`, `DOMAIN` |
+| Valkey | `VALKEY_NAME`, `VALKEY_IMAGE`, `VALKEY_ALIAS`, `VALKEY_PORT`, `VALKEY_VOLUME_NAME` |
+| Redis | `REDIS_NAME`, `REDIS_IMAGE`, `REDIS_ALIAS`, `REDIS_VOLUME_NAME` |
+| Postgres | `POSTGRES_NAME`, `POSTGRES_IMAGE`, `POSTGRES_ALIAS`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_PORT`, `POSTGRES_VOLUME_NAME` |
+| OpenSearch | `OPENSEARCH_NAME`, `OPENSEARCH_IMAGE`, `OPENSEARCH_ALIAS`, `OPENSEARCH_CLUSTER_NAME`, `OPENSEARCH_NODE_NAME`, `OPENSEARCH_JAVA_OPTS`, `OPENSEARCH_INITIAL_ADMIN_PASSWORD`, `OPENSEARCH_PORT`, `OPENSEARCH_PERFORMANCE_PORT`, `OPENSEARCH_VOLUME_NAME` |
+| MinIO | `MINIO_NAME`, `MINIO_IMAGE`, `MINIO_ALIAS`, `MINIO_ROOT_USER`, `MINIO_ROOT_PASSWORD`, `MINIO_PORT`, `MINIO_CONSOLE_PORT`, `MINIO_VOLUME_NAME` |
+| RabbitMQ | `RABBITMQ_NAME`, `RABBITMQ_IMAGE`, `RABBITMQ_ALIAS`, `RABBITMQ_DEFAULT_USER`, `RABBITMQ_DEFAULT_PASS`, `RABBITMQ_PORT`, `RABBITMQ_MANAGEMENT_PORT`, `RABBITMQ_VOLUME_NAME` |
+| Mail | `MAIL_NAME`, `MAIL_IMAGE`, `MAIL_HOSTNAME`, `MAIL_ALIAS`, `MAIL_TZ`, `MAIL_HTTPS`, `MAIL_WEB_PORT`, `MAIL_SMTP_PORT`, `MAIL_SUBMISSION_PORT`, `MAIL_SMTPS_PORT`, `MAIL_IMAP_PORT`, `MAIL_IMAPS_PORT`, `MAIL_POP3_PORT`, `MAIL_POPS_PORT`, `MAIL_SIEVE_PORT`, `DOMAIN`, `MAIL_VOLUME_NAME` |
 
 Each `*_IMAGE` variable overrides the default image tag, so you can pin a version or switch registry without changing the file. Each `*_NAME` variable sets both the Compose project name and the container name; its default is the current `prod-*` value. Each `*_ALIAS` variable sets the stable internal DNS name on `production-network` and `dokploy-network`; its default is the old `dokploy-*` value.
 
-For multiple deployments on one host, set a unique `*_NAME` and `*_ALIAS` for every stack. `*_PORT` values set the container port; leave them at their defaults unless the service is also configured to listen on the new port.
+For multiple deployments on one host, set a unique `*_NAME`, `*_ALIAS`, and `*_VOLUME_NAME` for every stack. `*_PORT` values set the container port; leave them at their defaults unless the service is also configured to listen on the new port.
 
 All `ports` entries use container-port-only syntax, so Docker assigns a free host port for each deployment instead of binding a fixed host port. To find the generated host port:
 
@@ -94,12 +94,12 @@ Redis is internal-only: it has no published port and is reached over `production
   ```
   Default heap is 512 MB via `OPENSEARCH_JAVA_OPTS`; raise it for larger datasets.
 - **MinIO** — the default image is `elestio/minio:latest`. API is on container port 9000, console on 9001. Healthcheck calls `mc ready local`. When adding a domain in Dokploy, set the target container port to **9001** for the web console; port 9000 is the S3 API.
-- **Mail** — set `MAIL_HOSTNAME` (or `DOMAIN`) before the first deploy. `HTTPS=OFF` expects TLS termination in Dokploy's Traefik. Mail ports are published to random host ports; keep the `*_PORT` defaults unless Poste.io is reconfigured to match.
+- **Mail** — set `MAIL_HOSTNAME` (or `DOMAIN`) before the first deploy. `HTTPS=OFF` expects TLS termination in Dokploy's Traefik. Publish container port **80** (`MAIL_WEB_PORT`) for the Poste.io admin UI and set the Dokploy domain target port to 80. Mail ports are published to random host ports; keep the `*_PORT` defaults unless Poste.io is reconfigured to match.
 
 ## 6. Deploy and troubleshoot
 
 1. Create `production-network` (Dokploy creates `dokploy-network` itself).
-2. Set unique `*_NAME` and `*_ALIAS` values plus real credentials in Dokploy.
+2. Set unique `*_NAME`, `*_ALIAS`, and `*_VOLUME_NAME` values plus real credentials in Dokploy.
 3. Deploy one stack at a time and check its health status in Dokploy.
 
 Common problems:
