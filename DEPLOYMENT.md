@@ -17,9 +17,9 @@ Dokploy's Traefik runs on its own `dokploy-network` (created by Dokploy) and onl
 
 ## 2. Create storage / drives
 
-Each stack uses an explicitly named volume set by `*_VOLUME_NAME`: `valkey_data`, `redis_data`, `postgres_data`, `opensearch_data`, `minio_data`, `rabbitmq_data`, `poste-data`, `moodle_data`, and `moodledata`. Mail defaults to `${MAIL_NAME:-dev-mail}_poste-data`, preserving the current project-scoped volume; set `MAIL_VOLUME_NAME` to reuse a different existing volume or isolate another deployment. Docker creates these automatically on the first deploy. `docker compose down` keeps them; only `down -v` or deleting the volume removes the data.
+Each stack uses an explicitly named volume set by `*_VOLUME_NAME`: `valkey_data`, `redis_data`, `postgres_data`, `opensearch_data`, `minio_data`, `rabbitmq_data`, `poste-data`, `moodle_data`, and `moodledata`. Mail leaves `MAIL_VOLUME_NAME` unset by default, so Compose keeps the existing derived volume `${MAIL_NAME:-dev-mail}_poste-data`; set `MAIL_VOLUME_NAME` only to reuse a different existing volume or isolate another deployment. Docker creates these automatically on the first deploy. `docker compose down` keeps them; only `down -v` or deleting the volume removes the data.
 
-Most stacks use explicit bare volume names; mail keeps its current project-scoped name by default. Set a unique `*_VOLUME_NAME` for each deployment to avoid sharing data. If you previously used a host bind mount such as `/storage/minio`, copy that data into the new named volume before switching.
+Most stacks use explicit bare volume names; mail keeps Compose's project-scoped name unless `MAIL_VOLUME_NAME` is set. Set a unique `*_VOLUME_NAME` when you need a different deployment volume. If you previously used a host bind mount such as `/storage/minio`, copy that data into the new named volume before switching.
 
 For a dedicated disk or shared storage:
 
@@ -51,10 +51,10 @@ Set these in each service's Environment section instead of editing the compose f
 | OpenSearch | `OPENSEARCH_NAME`, `OPENSEARCH_IMAGE`, `OPENSEARCH_ALIAS`, `OPENSEARCH_CLUSTER_NAME`, `OPENSEARCH_NODE_NAME`, `OPENSEARCH_JAVA_OPTS`, `OPENSEARCH_INITIAL_ADMIN_PASSWORD`, `OPENSEARCH_PORT`, `OPENSEARCH_PERFORMANCE_PORT`, `OPENSEARCH_VOLUME_NAME` |
 | MinIO | `MINIO_NAME`, `MINIO_IMAGE`, `MINIO_ALIAS`, `MINIO_ROOT_USER`, `MINIO_ROOT_PASSWORD`, `MINIO_PORT`, `MINIO_CONSOLE_PORT`, `MINIO_VOLUME_NAME` |
 | RabbitMQ | `RABBITMQ_NAME`, `RABBITMQ_IMAGE`, `RABBITMQ_ALIAS`, `RABBITMQ_DEFAULT_USER`, `RABBITMQ_DEFAULT_PASS`, `RABBITMQ_PORT`, `RABBITMQ_MANAGEMENT_PORT`, `RABBITMQ_VOLUME_NAME` |
-| Mail | `MAIL_NAME`, `MAIL_IMAGE`, `MAIL_HOSTNAME`, `MAIL_ALIAS`, `MAIL_TZ`, `MAIL_HTTPS`, `MAIL_WEB_PORT`, `MAIL_SMTP_PORT`, `MAIL_SUBMISSION_PORT`, `MAIL_SMTPS_PORT`, `MAIL_IMAP_PORT`, `MAIL_IMAPS_PORT`, `MAIL_POP3_PORT`, `MAIL_POPS_PORT`, `MAIL_SIEVE_PORT`, `DOMAIN`, `MAIL_VOLUME_NAME`, `MAIL_TRAEFIK_ENABLE`, `MAIL_TRAEFIK_ROUTER`, `MAIL_TRAEFIK_ENTRYPOINT`, `MAIL_TRAEFIK_TLS` |
+| Mail | `MAIL_NAME`, `MAIL_IMAGE`, `MAIL_HOSTNAME`, `MAIL_ALIAS`, `MAIL_TZ`, `MAIL_HTTPS`, `MAIL_WEB_PORT`, `MAIL_SMTP_PORT`, `MAIL_SUBMISSION_PORT`, `MAIL_SMTPS_PORT`, `MAIL_IMAP_PORT`, `MAIL_IMAPS_PORT`, `MAIL_POP3_PORT`, `MAIL_POPS_PORT`, `MAIL_SIEVE_PORT`, `DOMAIN`, `MAIL_VOLUME_NAME` |
 | Moodle | `MOODLE_NAME`, `MOODLE_IMAGE`, `MOODLE_ALIAS`, `MOODLE_PORT`, `MOODLE_HTTPS_PORT`, `DB_TYPE`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `MOODLE_USERNAME`, `MOODLE_PASSWORD`, `MOODLE_EMAIL`, `MOODLE_SITE_NAME`, `MOODLE_PHP_MEMORY_LIMIT`, `MOODLE_PHP_MAX_EXECUTION_TIME`, `MOODLE_VOLUME_NAME`, `MOODLE_DATA_VOLUME_NAME` |
 
-Each `*_IMAGE` variable overrides the default image tag, so you can pin a version or switch registry without changing the file. Each `*_NAME` variable sets both the Compose project name and the container name; its default is the existing value (`dev-*` for most stacks, `assetminds-mailserver` for mail). Each `*_ALIAS` variable sets the stable internal DNS name on `production-network` and `dokploy-network`; its default is the old `dokploy-*` value.
+Each `*_IMAGE` variable overrides the default image tag, so you can pin a version or switch registry without changing the file. Each `*_NAME` variable sets both the Compose project name and the container name; its default is the current `dev-*` value. Each `*_ALIAS` variable sets the stable internal DNS name on `production-network` and `dokploy-network`; its default is the old `dokploy-*` value.
 
 For multiple deployments on one host, set a unique `*_NAME`, `*_ALIAS`, and `*_VOLUME_NAME` for every stack. `*_PORT` values set the container port; leave them at their defaults unless the service is also configured to listen on the new port.
 
@@ -96,7 +96,7 @@ Redis is internal-only: it has no published port and is reached over `production
   ```
   Default heap is 512 MB via `OPENSEARCH_JAVA_OPTS`; raise it for larger datasets.
 - **MinIO** — the default image is `elestio/minio:latest`. API is on container port 9000, console on 9001. Healthcheck calls `mc ready local`. When adding a domain in Dokploy, set the target container port to **9001** for the web console; port 9000 is the S3 API.
-- **Mail** — defaults preserve the existing `assetminds-mailserver` container and `assetminds-mailserver_poste-data` volume. Set `MAIL_HOSTNAME` (or `DOMAIN`) before deploying. `HTTPS=OFF` expects TLS termination in Traefik; the original `poste` router labels are restored and configurable via `MAIL_TRAEFIK_*`. Mail ports are published to random host ports; keep the `*_PORT` defaults unless Poste.io is reconfigured to match.
+- **Mail** — defaults match the working `dev-mail` template and keep Compose's derived `poste-data` volume. Set `MAIL_VOLUME_NAME` only when you need a different volume. `HTTPS=OFF` expects TLS termination in Dokploy's Traefik. Mail ports are published to random host ports; keep the `*_PORT` defaults unless Poste.io is reconfigured to match.
 - **Moodle** — set `DB_HOST` to the unique Postgres alias for this deployment, not `localhost`. HTTP and HTTPS listen on container ports 8080 and 8443.
 
 ## 6. Deploy and troubleshoot
