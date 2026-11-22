@@ -1,0 +1,85 @@
+
+services:
+  front:
+    image: ghcr.io/mailu/nginx:2024.06
+    restart: unless-stopped
+    env_file: mailu.env
+    ports:
+      - "80:"
+      - "443"
+      - "25"
+      - "465"
+      - "587"
+      - "993"
+      - "995"
+      - "4190"
+    volumes:
+      - mailu_certs:/certs
+      - mailu_overrides:/overrides
+    depends_on:
+      - admin
+    networks:
+      - mailu
+
+  admin:
+    image: ghcr.io/mailu/admin:2024.06
+    restart: unless-stopped
+    env_file: mailu.env
+    volumes:
+      - mailu_data:/data
+      - mailu_dkim:/dkim
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - mailu
+
+  imap:
+    image: ghcr.io/mailu/dovecot:2024.06
+    restart: unless-stopped
+    env_file: mailu.env
+    volumes:
+      - mailu_mail:/mail
+      - mailu_overrides:/overrides
+    networks:
+      - mailu
+
+  smtp:
+    image: ghcr.io/mailu/postfix:2024.06
+    restart: unless-stopped
+    env_file: mailu.env
+    volumes:
+      - mailu_queue:/queue
+      - mailu_overrides:/overrides
+    networks:
+      - mailu
+
+  antispam:
+    image: ghcr.io/mailu/rspamd:2024.06
+    restart: unless-stopped
+    env_file: mailu.env
+    volumes:
+      - mailu_filter:/var/lib/rspamd
+      - mailu_overrides:/overrides
+    networks:
+      - mailu
+
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    volumes:
+      - mailu_redis:/data
+    networks:
+      - mailu
+
+volumes:
+  mailu_certs:
+  mailu_overrides:
+  mailu_data:
+  mailu_dkim:
+  mailu_mail:
+  mailu_queue:
+  mailu_filter:
+  mailu_redis:
+
+networks:
+  mailu:
+    driver: bridge
