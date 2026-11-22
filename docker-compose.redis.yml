@@ -37,3 +37,4 @@ networks:
 
 volumes:
   redis_data:
+    name: ${REDIS_VOLUME_NAME:-redis_data}

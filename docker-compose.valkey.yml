@@ -37,3 +37,4 @@ networks:
 
 volumes:
   valkey_data:
+    name: ${VALKEY_VOLUME_NAME:-valkey_data}

@@ -41,3 +41,4 @@ networks:
 
 volumes:
   postgres_data:
+    name: ${POSTGRES_VOLUME_NAME:-postgres_data}

@@ -39,7 +39,9 @@ services:
 
 volumes:
   moodle_data:
+    name: ${MOODLE_VOLUME_NAME:-moodle_data}
   moodledata:
+    name: ${MOODLE_DATA_VOLUME_NAME:-moodledata}
 
 networks:
   production-network:
